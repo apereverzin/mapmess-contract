@@ -1,0 +1,9 @@
+.idea/
+*.iml
+/build/
+/node_modules/
+**.bin
+**/*.abi
+/package-lock.json
+.rinkeby/
+*.pdf
