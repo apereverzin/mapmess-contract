@@ -1,5 +1,6 @@
 pragma solidity ^0.4.17;
 
+
 contract MapMess {
     address public owner = msg.sender;
 
@@ -20,81 +21,68 @@ contract MapMess {
         selfdestruct(owner);
     }
 
-    event tokensBought(address indexed addr, uint256 amount);
-
-    event tokensTransferred(address indexed from, address indexed to, uint256 amount);
-
-    mapping (address => uint256) public balances;
-
     string public name;
 
     string public symbol;
 
-    uint8 public decimals;
-
     uint256 public totalSupply;
 
-    uint8 public tokenPriceEther;
+    uint8 public constant decimals = 18;
+
+    mapping (address => uint256) balances;
+
+    mapping (address => mapping (address => uint256)) allowed;
 
     function MapMess(
     string _name,
     string _symbol,
-    uint8 _decimals,
-    uint256 _totalSupply,
-    uint8 _tokenPriceEther) public {
+    uint256 _totalSupply) public {
         name = _name;
         symbol = _symbol;
-        decimals = _decimals;
         totalSupply = _totalSupply;
         balances[msg.sender] = _totalSupply;
-        tokenPriceEther = _tokenPriceEther;
     }
 
     function() public payable {
-
+        //
     }
 
-    function getOwner() public constant returns (address) {
-        return owner;
-    }
-
-    function totalSupply() public constant returns (uint _totalSupply) {
+    function totalSupply() constant public returns (uint256) {
         return totalSupply;
     }
 
-    function buyTokens() public payable {
-        uint numberOfTokens = msg.value / tokenPriceEther;
-        require(balances[owner] >= numberOfTokens);
-
-        balances[msg.sender] += numberOfTokens;
-        balances[owner] -= numberOfTokens;
-
-        tokensBought(msg.sender, numberOfTokens);
-    }
-
-    function getTokenPrice() public constant returns (uint8) {
-        return tokenPriceEther;
-    }
-
-    function getBalance() public constant returns (uint256 balance) {
-        return balanceOf(msg.sender);
-    }
-
-    function balanceOf(address _owner) public constant returns (uint256 balance) {
+    function balanceOf(address _owner) constant public returns (uint256){
         return balances[_owner];
     }
 
-    function transfer(address _to, uint256 _amount) public returns (bool success) {
-        if (balances[msg.sender] >= _amount
-        && _amount > 0
-        && balances[_to] + _amount > balances[_to]) {
-            balances[msg.sender] -= _amount;
-            balances[_to] += _amount;
-            tokensTransferred(msg.sender, _to, _amount);
-            return true;
-        }
-        else {
-            return false;
-        }
+    function transfer(address _to, uint256 _value) public returns (bool) {
+        require(balances[msg.sender] >= _value && _value > 0);
+
+        balances[msg.sender] = balances[msg.sender] - _value;
+        balances[_to] = balances[_to] + _value;
+
+        tokensTransferred(msg.sender, _to, _value);
+        return true;
     }
+
+    function transferFrom(address _from, address _to, uint256 _value)
+    public onlyOwner returns (bool) {
+        balances[_from] = balances[_from] - _value;
+        balances[_to] = balances[_to] + _value;
+        allowed[_from][msg.sender] = allowed[_from][msg.sender] - _value;
+
+        tokensTransferred(_from, _to, _value);
+        return true;
+    }
+
+    function approve(address _spender, uint256 _value) public returns (bool){
+        allowed[msg.sender][_spender] = _value;
+
+        tokensTransferApproved(msg.sender, _spender, _value);
+        return true;
+    }
+
+    event tokensTransferred(address indexed _from, address indexed _to, uint256 _value);
+
+    event tokensTransferApproved(address indexed _owner, address indexed _spender, uint256 _value);
 }
