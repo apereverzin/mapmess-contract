@@ -1,13 +1,8 @@
 pragma solidity ^0.4.17;
 
 
-import "./SafeMath.sol";
-
-
 contract MapMess {
     address public owner;
-
-    using SafeMath for uint256;
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -50,8 +45,8 @@ contract MapMess {
     function transfer(address _to, uint256 _value) public returns (bool) {
         require(balances[msg.sender] >= _value && _value > 0);
 
-        balances[msg.sender] = balances[msg.sender].sub(_value);
-        balances[_to] = balances[_to].add(_value);
+        balances[msg.sender] = sub(balances[msg.sender], _value);
+        balances[_to] = add(balances[_to], _value);
 
         Transfer(msg.sender, _to, _value);
         return true;
@@ -61,11 +56,22 @@ contract MapMess {
     public onlyOwner returns (bool) {
         require(balances[_from] >= _value && _value > 0);
 
-        balances[_from] = balances[_from].sub(_value);
-        balances[_to] = balances[_to].add(_value);
+        balances[_from] = sub(balances[_from], _value);
+        balances[_to] = add(balances[_to], _value);
 
         Transfer(_from, _to, _value);
         return true;
+    }
+
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        assert(b <= a);
+        return a - b;
+    }
+
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        assert(c >= a);
+        return c;
     }
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
