@@ -10,3 +10,5 @@ commands.txt
 .rinkeby/
 *.pdf
 src/
+addresses/rinkeby.txt
+addresses/mainnet.txt

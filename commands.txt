@@ -1,0 +1,235 @@
+Web3 = require('web3')
+web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
+
+0xcb68535e193f6cfca90213c3a13bc2519cf27f90
+0xc0a862fbbc7d9396df9a923513b084c33499feee
+
+web3.personal.unlockAccount('0xcb68535e193f6cfca90213c3a13bc2519cf27f90', '', 150000)
+
+var safeMathAbiText = fs.readFileSync('/private/etc/Work1/ethereum/mapmess/mapmess-contract/build/SafeMath.abi').toString()
+var safeMathAbi = JSON.parse(safeMathAbiText)
+var safeMathBytecodeText = fs.readFileSync('/private/etc/Work1/ethereum/mapmess/mapmess-contract/build/SafeMath.bin').toString()
+var safeMathBytecode = '0x' + safeMathBytecodeText
+var SafeMath = web3.eth.contract(safeMathAbi)
+safeMathDeployedLibrary = SafeMath.new({data: safeMathBytecode, from: '0xcb68535e193f6cfca90213c3a13bc2519cf27f90', gas: 4700000})
+safeMathDeployedLibrary.address
+
+var SafeMath = web3Rinkeby.eth.contract(safeMathAbi)
+
+var mapMessAbiText = fs.readFileSync('/private/etc/Work1/ethereum/mapmess/mapmess-contract/build/MapMess.abi').toString()
+var mapMessAbi = JSON.parse(mapMessAbiText)
+var mapMessBytecodeText = fs.readFileSync('/private/etc/Work1/ethereum/mapmess/mapmess-contract/build/MapMess.bin').toString()
+var mapMessBytecode = '0x' + mapMessBytecodeText
+var MapMess = web3.eth.contract(mapMessAbi)
+var mainMapMess = web3Mainnet.eth.contract(mapMessAbi)
+var rinkebyMapMess = web3Rinkeby.eth.contract(mapMessAbi)
+mapMessDeployedContract = MapMess.new('Advanced Map Coin', 'AMC', 50000000, {data: mapMessBytecode, from: '0xcb68535e193f6cfca90213c3a13bc2519cf27f90', gas: 4700000})
+mapMessDeployedContract.address
+mapMessContractInstance = MapMess.at(mapMessDeployedContract.address)
+mapMessContractInstance.transfer('0xc0a862fbbc7d9396df9a923513b084c33499feee', 100, {from: '0xcb68535e193f6cfca90213c3a13bc2519cf27f90', gas: 4700000})
+_____________________________________________
+Rinkeby:
+geth --rinkeby --verbosity 0 console --syncmode "fast"
+geth --networkid=4 --datadir=./.rinkeby --cache=512 --ethstats='yournode:Respect my authoritah!@stats.rinkeby.io' --bootnodes=enode://a24ac7c5484ef4ed0c5eb2d36620ba4e4aa13b8c84684e1b4aab0cebea2ae45cb4d375b77eab56516d34bfbd3c1a833fc51296ff084b770b94fb9028c4d25ccf@52.169.42.101:3030 --verbosity 0 --rpcapi="db,eth,net,web3,personal,web3" --rpccorsdomain "*" --rpc console
+
+var Web3 = require('web3');
+var util = require('ethereumjs-util');
+var tx = require('ethereumjs-tx');
+var lightwallet = require('eth-lightwallet');
+var txutils = lightwallet.txutils;
+var web3Rinkeby = new Web3(new Web3.providers.HttpProvider('https://rinkeby.infura.io/'))
+var rinkebyAddress = '0xb97e446c796df3cc37af4c0386e5c0f0e7e1afa1'
+var rinkebyKey = '62f20a7796be843160cc32b8bf081c79782850953b62c3cea53f17cd1b034887'
+2nd rinkeby address: 0xB0836a3a999260edC2A6Ee2a9f375Aff1886e4Fe
+
+var safeMathAbiText = fs.readFileSync('/private/etc/Work1/ethereum/mapmess/mapmess-contract/build/SafeMath.abi').toString()
+var safeMathAbi = JSON.parse(safeMathAbiText)
+var safeMathBytecodeText = fs.readFileSync('/private/etc/Work1/ethereum/mapmess/mapmess-contract/build/SafeMath.bin').toString()
+var safeMathBytecode = '0x' + safeMathBytecodeText
+var SafeMath = web3Rinkeby.eth.contract(safeMathAbi)
+
+var mapMessAbiText = fs.readFileSync('/private/etc/Work1/ethereum/mapmess/mapmess-contract/build/MapMess.abi').toString()
+var mapMessAbi = JSON.parse(mapMessAbiText)
+var mapMessBytecodeText = fs.readFileSync('/private/etc/Work1/ethereum/mapmess/mapmess-contract/build/MapMess.bin').toString()
+var mapMessBytecode = '0x' + mapMessBytecodeText
+var rinkebyMapMess = web3Rinkeby.eth.contract(mapMessAbi)
+
+var web3Mainnet = new Web3(new Web3.providers.HttpProvider('https://mainnet.infura.io/'))
+var mainAddress = '0x5c3e3B55A62e3633054444832A7a806cb0Ec80BC'
+var mainKey = '934c4a9eca31d1a234b5b015b1397f690f8692fb33c92eeaad3364ac882310e2'
+web3Mainnet.eth.getBalance(mainAddress)
+
+var abijs = require('ethereumjs-abi')
+var parameterTypes = ["string", "string", "uint256"]
+var parameterValues = ["Advanced Map Coin", "AMC", "50000000000000000000000000"]
+var encoded = abijs.rawEncode(parameterTypes, parameterValues)
+var params = encoded.toString('hex')
+console.log(params)
+function rinkebySendRaw(rawTx) {
+    var privateKey = new Buffer(rinkebyKey, 'hex');
+    var transaction = new tx(rawTx);
+    transaction.sign(privateKey);
+    var serializedTx = transaction.serialize().toString('hex');
+    web3Rinkeby.eth.sendRawTransaction(
+    '0x' + serializedTx, function(err, result) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log(result);
+        }
+    });
+}
+var rinkebyRawTx = {
+    nonce: web3Rinkeby.toHex(web3Rinkeby.eth.getTransactionCount(rinkebyAddress)),
+    gasLimit: web3Rinkeby.toHex(5000000),
+    gasPrice: web3Rinkeby.toHex(40000000000),
+    data: mapMessBytecode + params
+}
+rinkebySendRaw(rinkebyRawTx)
+rinkebyContractAddress = '0x735b9b121e501c3d9320c728e480efcb22e761fc'
+rinkebyMapMessContractInstance = rinkebyMapMess.at(rinkebyContractAddress)
+rinkebyMapMessContractInstance.balanceOf('0xb97e446c796df3cc37af4c0386e5c0f0e7e1afa1')
+rinkebyMapMessContractInstance.balanceOf('0xB0836a3a999260edC2A6Ee2a9f375Aff1886e4Fe')
+
+function mainSendRaw(rawTx) {
+    var privateKey = new Buffer(mainKey, 'hex');
+    var transaction = new tx(rawTx);
+    transaction.sign(privateKey);
+    var serializedTx = transaction.serialize().toString('hex');
+    web3Mainnet.eth.sendRawTransaction(
+    '0x' + serializedTx, function(err, result) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log(result);
+        }
+    });
+}
+var mainRawTx = {
+    nonce: web3Mainnet.toHex(web3Mainnet.eth.getTransactionCount(mainAddress)),
+    gasLimit: web3Mainnet.toHex(5000000),
+    gasPrice: web3Mainnet.toHex(4000000000),
+    data: mapMessBytecode + params
+}
+mainSendRaw(mainRawTx)
+mainContractAddress = '0x7bd41a54f07ae504ff15b63e855fc6482e62312c'
+mainMapMessContractInstance = mainMapMess.at(mainContractAddress)
+
+tr: 0xa5840d9b5043c31f419c4135151a6fc8ac68e703616e5e4aa639c697ebf02b89
+contract: 0xb41dac205a67839a80fbee70e40067f67d0677dd
+cumulativeGasUsed: 3354190
+gasUsed: 587401
+tr: 0x03503fe5df421ebeac886e5a0d5a65dfa2d38788d1668c7b74b0e0e9615c5e20
+contract: 0x377e0cea1c4252dc3ac06d220732ce6304fabea0
+cumulativeGasUsed: 3427092
+gasUsed: 587657
+
+gasUsed 638446
+638446 * 20 GWei = 12768920 GWei  = 0.012768920 Eth
+
+
+var txOptions = {
+    nonce: web3Rinkeby.toHex(web3Rinkeby.eth.getTransactionCount(rinkebyAddress)),
+    gasLimit: web3Rinkeby.toHex(800000),
+    gasPrice: web3Rinkeby.toHex(20000000000),
+    to: rinkebyContractAddress
+}
+var rawTx = txutils.functionTx(mapMessAbi, 'transfer', ['0xB0836a3a999260edC2A6Ee2a9f375Aff1886e4Fe', 10000000000000000000], txOptions);
+rinkebySendRaw(rawTx)
+rinkebyMapMessContractInstance.balanceOf('0xb97e446c796df3cc37af4c0386e5c0f0e7e1afa1')
+rinkebyMapMessContractInstance.balanceOf('0xB0836a3a999260edC2A6Ee2a9f375Aff1886e4Fe')
+
+gasUsed 51708
+51708 * 20 GWei = 1034160 GWei = 0.001034160 Eth
+
+var txOptions = {
+    nonce: web3Mainnet.toHex(web3Mainnet.eth.getTransactionCount(mainAddress)),
+    gasLimit: web3Mainnet.toHex(5000000),
+    gasPrice: web3Mainnet.toHex(4000000000),
+    to: mainContractAddress
+}
+var rawTx = txutils.functionTx(mapMessAbi, 'transfer', ['0x0c178469AC091191F1Ef27F181489CD6A183d729', 10000000000000000000], txOptions);
+var rawTx = txutils.functionTx(mapMessAbi, 'kill', [], txOptions);
+mainSendRaw(rawTx)
+
+gasUsed 51708
+_____________________________________________
+
+0xfbFab4eeD5057310637C1CA95DCf8eC3Cea60BFA
+0x9528df4fd214a0c3653d27accfebb3e94657652c
+
+var MapMess = web3Rinkeby.eth.contract(mapMessAbi)
+mapMessContractInstance = MapMess.at('0x9528df4fd214a0c3653d27accfebb3e94657652c')
+
+_____________________________________________
+Mainnet
+Account
+0x5c3e3B55A62e3633054444832A7a806cb0Ec80BC
+934c4a9eca31d1a234b5b015b1397f690f8692fb33c92eeaad3364ac882310e2
+Moskovich' account
+0x0c178469AC091191F1Ef27F181489CD6A183d729
+
+Contract
+0x7bd41a54f07ae504ff15b63e855fc6482e62312c
+
+
+
+var testContract = web3.eth.contract([]);
+var test = testContract.new(
+   {
+     from: '0xcb68535e193f6cfca90213c3a13bc2519cf27f90',
+     data: safeMathBytecode,
+     gas: 3000000
+   }, function(e, contract){
+    console.log(e, contract);
+    if (typeof contract.address != 'undefined') {
+         console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
+    }
+ })
+
+var testContract = web3Rinkeby.eth.contract([]);
+var abijs = require('ethereumjs-abi')
+var parameterTypes = []
+var parameterValues = []
+var encoded = abijs.rawEncode(parameterTypes, parameterValues)
+var params = encoded.toString('hex')
+console.log(params)
+function rinkebySendRaw(rawTx) {
+    var privateKey = new Buffer(rinkebyKey, 'hex');
+    var transaction = new tx(rawTx);
+    transaction.sign(privateKey);
+    var serializedTx = transaction.serialize().toString('hex');
+    web3Rinkeby.eth.sendRawTransaction(
+    '0x' + serializedTx, function(err, result) {
+        if(err) {
+            console.log(err);
+        } else {
+            console.log(result);
+        }
+    });
+}
+var rinkebyRawTx = {
+    nonce: web3Rinkeby.toHex(web3Rinkeby.eth.getTransactionCount(rinkebyAddress)),
+    gasLimit: web3Rinkeby.toHex(5000000),
+    gasPrice: web3Rinkeby.toHex(40000000000),
+    data: safeMathBytecode + params
+}
+rinkebySendRaw(rinkebyRawTx)
+
+var test = testContract.new(
+   {
+     from: '0xb97e446c796df3cc37af4c0386e5c0f0e7e1afa1',
+     data: safeMathBytecode,
+     gas: 3000000
+   }, function(e, contract){
+    console.log(e, contract);
+    if (typeof contract.address != 'undefined') {
+         console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
+    } else {
+         console.log('Error: ' + e);
+    }
+ })
+
+#local 0x1c0616e7b6d742add1cd3063ece0996edad3f32a
+#Rinkeby 0x296585e8f9f1b15916ee16a25b9931b9132049d5
+#Mainnet
